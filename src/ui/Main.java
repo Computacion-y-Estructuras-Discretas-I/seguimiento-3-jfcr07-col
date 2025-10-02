@@ -3,6 +3,9 @@ package ui;
 import java.util.Scanner;
 import structures.PilaGenerica;
 import structures.TablasHash;
+import java.util.Set;
+import java.util.HashSet;
+
 
 public class Main {
 
@@ -21,7 +24,7 @@ public class Main {
             System.out.print("Opcion: ");
 
             int opcion = sc.nextInt();
-            sc.nextLine(); 
+            sc.nextLine();
 
             switch (opcion) {
                 case 1:
@@ -64,8 +67,26 @@ public class Main {
      * @return true si esta balanceada, false si no
      */
     public boolean verificarBalanceo(String s) {
-        // TODO: completar 
-        return false;
+        PilaGenerica<Character> pila = new PilaGenerica<>(s.length());
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
+            if (c == '(' || c == '[' || c == '{') {
+                pila.Push(c);
+            } else if (c == ')' || c == ']' || c == '}') {
+                if (pila.getTop() == 0) {
+                    return false;
+                }
+                char tope = pila.Pop();
+                if ((c == ')' && tope != '(') ||
+                        (c == ']' && tope != '[') ||
+                        (c == '}' && tope != '{')) {
+                    return false;
+                }
+            }
+        }
+        return pila.getTop() == 0;
     }
 
     /**
@@ -74,7 +95,35 @@ public class Main {
      * @param objetivo suma objetivo
      */
     public void encontrarParesConSuma(int[] numeros, int objetivo) {
-        // TODO: completar
+        try {
+            TablasHash tabla = new TablasHash(numeros.length);
+            Set<String> pares = new HashSet<>();
+
+            for (int num : numeros) {
+                tabla.insert(num, num);
+            }
+
+            for (int x : numeros) {
+                int complemento = objetivo - x;
+
+                if (x != complemento && tabla.search(complemento, complemento)) {
+                    int menor = Math.min(x, complemento);
+                    int mayor = Math.max(x, complemento);
+
+                    String par = "(" + menor + ", " + mayor + ")";
+
+                    if (!pares.contains(par)) {
+                        pares.add(par);
+                        System.out.println(par);
+
+                        tabla.delete(x, x);
+                        tabla.delete(complemento, complemento);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     public static void main(String[] args) throws Exception {
